@@ -18,7 +18,7 @@ vector<string> parse_csv(string line){
 			columns.push_back(currentToken);
 			currentToken = "";
 		}
-		else
+		else if(line[i] != '\n' && line[i] != '\r')
 			currentToken += line[i];
 	}
 	//add final column
@@ -40,6 +40,9 @@ vector<string> getLabels(void){
 	getline(labels_taxonomy,line_labels);
 	vector<string>labels_rows;
 	while(getline(labels_taxonomy,line_labels)){
+		//checks if the last caracter of the line is a carriage return .back()
+		if (!line_labels.empty() && line_labels.back() == '\r')
+			line_labels.pop_back();
 		labels_rows.push_back(line_labels);
 	}
 	labels_taxonomy.close();
@@ -146,7 +149,7 @@ vector<string> tokenize( string text) {
 	set<string> STOPWORDS = {
 		"and","or","the","a","an","of","in","on","for","with",
 		"services","service","solutions","solution",
-		"company","companies","business","industry"
+		"company","companies","business","industry","manufacturing"
 	};
     vector<string> tokens;
     string current;
@@ -252,7 +255,7 @@ void assignLabels(vector<Company>& companies,  vector<string>& labels, InvertedI
 
         // Assign label to companies with positive score
         for (auto& [cid, score] : companyScores) {
-            if (score >= 3) { // threshold to assign label
+            if (score >= 5) { // threshold to assign label
                 companies[cid].addLabel(label);
             }
         }
@@ -277,9 +280,9 @@ int main(void){
 	for(auto &c : companies){
 		vector<string> lab = c.getLabels();
 		cout << "Company ID " << c.getId() << ": ";
-		// for(int i = 0; i < lab.size(); i++){
-		// 	cout << lab[i] << " | ";
-		// }
+		for(int i = 0; i < lab.size(); i++){
+			cout << lab[i] << " | ";
+		}
 		cout << endl;
 		cout << "---------------------" << endl;
 
