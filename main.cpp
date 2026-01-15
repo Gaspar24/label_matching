@@ -1,39 +1,13 @@
-
-#include "classes.hpp"
-#include <cctype>
+#include "Company.hpp"
 
 
-//helper function to parse the cs
-vector<string> parse_csv(string line){
-	string currentToken;
-	bool quoteFlag = false;
-	vector<string>columns;
-
-	for(int i = 0; i <line.length(); i++){
-		if(line[i] == '"'){
-			quoteFlag =!quoteFlag;
-
-		}
-		else if(line[i] == ',' && quoteFlag == false){
-			columns.push_back(currentToken);
-			currentToken = "";
-		}
-		else if(line[i] != '\n' && line[i] != '\r')
-			currentToken += line[i];
-	}
-	//add final column
-	columns.push_back(currentToken);
-	return columns;
-}
-
-
-// use with arguments later
 // works
-vector<string> getLabels(void){
+vector<string> getLabels(string labels_path){
 	fstream labels_taxonomy;
-	labels_taxonomy.open("insurance_taxonomy.csv",ios::in);
+	labels_taxonomy.open(labels_path,ios::in);
 	if(!labels_taxonomy.is_open()){
-		cout << "can t open file!\n";
+		cerr << "Can t open labels file\n";
+        cerr << "Check if the file exists or the if file name given as argument is correct!\n";
 		exit(1);
 	}
 	string line_labels;
@@ -48,32 +22,7 @@ vector<string> getLabels(void){
 	labels_taxonomy.close();
 	return labels_rows;
 }
-//works
-vector<string> parseTags(string str) {
-    vector<string> tags;
-    string tag = "";
-    
-    for (int i = 0; i < str.length(); i++) {
-        // 1. If comma, save the tag and reset
-        if (str[i] == ',') {
-            if (!tag.empty()){
-				tags.push_back(tag);
-				tag = "";
-			}
-        }
-        // 2. If it's a valid character (alphanumeric or space), add to tag
-        // We exclude spaces at the very beginning of a tag to prevent " Leading Spaces"
-        else if (isalnum(static_cast<unsigned char>(str[i])) || (str[i] == ' ' && !tag.empty())) {
-            tag += str[i];
-        }
-        // 3. Ignore everything else (brackets, quotes)
-    }
-    // 4. Push the last tag that wasn't followed by a comma
-    if (!tag.empty()) {
-        tags.push_back(tag);
-    }
-    return tags;
-}
+
 
 
 // works
@@ -105,11 +54,12 @@ void assignAtributes(Company &company,vector<string> &columns, int id){
 	company.setId(id);
 }
 
-vector<Company> getAllCompanies() {
-    fstream companiesFile("ml_insurance_challenge1.csv", ios::in);
+vector<Company> getAllCompanies(string companies_path) {
+    fstream companiesFile(companies_path, ios::in);
     if (!companiesFile.is_open()) {
-        cout << "can't open company file\n";
-        exit(1);
+        cerr << "Can t open companies file\n";
+        cerr << "Check if the file exists or if the file name given as argument is correct!\n";
+		exit(1);
     }
 
     vector<Company> companies;
@@ -134,55 +84,6 @@ vector<Company> getAllCompanies() {
 }
 
 
-// make a string to lower function
-
-string toLowerString(string str){
-	int i = 0;
-	while(i < str.length()){
-		str[i] = tolower(static_cast<unsigned char>(str[i]));
-		i++;
-	}
-	return str;
-}
-
-vector<string> tokenize( string text) {
-	set<string> STOPWORDS = {
-		"and","or","the","a","an","of","in","on","for","with",
-		"services","service","solutions","solution",
-		"company","companies","business","industry","manufacturing"
-	};
-    vector<string> tokens;
-    string current;
-
-    for (int i = 0; i < text.length();i++) {
-		char c = text[i];
-        if (isalnum(static_cast<unsigned char>(c))) {
-            current += tolower(c);
-        } else {
-            if (!current.empty()) {
-				if(STOPWORDS.find(current) == STOPWORDS.end())
-                	tokens.push_back(current);
-                current.clear();
-            }
-        }
-    }
-    if (!current.empty() && STOPWORDS.find(current) == STOPWORDS.end())
-        tokens.push_back(current);
-
-    return tokens;
-}
-
-// Helper: remove punctuation
-std::string removePunct(const std::string& str) {
-    std::string result;
-    for (char c : str) {
-        if (!ispunct(static_cast<unsigned char>(c)))
-            result += c;
-        else
-            result += ' '; // replace punctuation with space to split words
-    }
-    return result;
-}
 using InvertedIndex = unordered_map<string,set<pair<int,Field>>>;
 
 InvertedIndex buildInvertedIndex(std::vector<Company>& companies) {
@@ -261,11 +162,22 @@ void assignLabels(vector<Company>& companies,  vector<string>& labels, InvertedI
         }
     }
 }
+
+// use with arguments later
 // 
-int main(void){
+int main(int argc, char *argv[]){
+
+    if(argc != 3){
+        // type to  error 
+        cerr<< "Wrong number of arguments!" << endl;
+        return 1;
+    }
+    string folder_path = "insurances/";
+    string companies_path = folder_path + argv[1];
+    string labels_path = folder_path +  argv[2];
 	Company company;
-	vector<Company>companies = getAllCompanies();
-	vector<string>labels = getLabels();
+	vector<Company>companies = getAllCompanies(companies_path);
+	vector<string>labels = getLabels(labels_path);
 
     // Assign labels
 	InvertedIndex index = buildInvertedIndex(companies);
@@ -287,63 +199,12 @@ int main(void){
 		cout << "---------------------" << endl;
 
 	}
+
+
 	return 0;
 
 }
 
-// int main() {
-//     // Create a few sample companies
-//     vector<Company> companies(2);
-
-//     companies[0].setId(0);
-//     companies[0].setDescription("We provide civil engineering and construction services");
-//     companies[0].setBussines_tag({"Construction Services", "Multi-utilities"});
-//     companies[0].setSector("Services");
-//     companies[0].setCategory("Civil Engineering Services");
-//     companies[0].setNiche("Other Heavy and Civil Engineering Construction");
-
-//     companies[1].setId(1);
-//     companies[1].setDescription("A vegetable farm with a farm shop and cafe");
-//     companies[1].setBussines_tag({"Farm Cafe", "Fresh Vegetables"});
-//     companies[1].setSector("Manufacturing");
-//     companies[1].setCategory("Farms & Agriculture Production");
-//     companies[1].setNiche("All Other Miscellaneous Crop Farming");
-
-//     // Sample labels
-//     vector<string> labels = {
-//         "Construction Services",
-//         "Community Engagement Services",
-// 		"Food Safety Services",
-//         "Environmental Health Services",
-// "Quality Assurance Services",
-// "Compliance Services",
-// "Environmental Health Services",
-// "Risk Assessment Services",
-// "Crisis Management Services",
-// "Community Engagement Services",
-// "Stakeholder Services",
-// "Corporate Responsibility Services",
-// "Fundraising Services",
-// "Volunteer Services",
-// "Non-Profit Management",
-// "Arts Services",
-// "Sports Management Services",
-// "Fitness Coaching",
-// "Health Promotion Services",
-// "Physical Therapy Services"
-//     };
-
-//     InvertedIndex index = buildInvertedIndex(companies);
-//     assignLabels(companies, labels, index);
-
-//     for (auto& c : companies) {
-//         cout << "Company ID " << c.getId() << " assigned labels: ";
-//         for (auto& l : c.getLabels()) cout << l << " | ";
-//         cout << endl;
-//     }
-
-//     return 0;
-// }
 
 /// try to match every keword from the label in every section for the company
 // conver everything to lowercase if use keyword
