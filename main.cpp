@@ -84,7 +84,6 @@ vector<Company> getAllCompanies(string companies_path) {
 }
 
 
-using InvertedIndex = unordered_map<string,set<pair<int,Field>>>;
 
 InvertedIndex buildInvertedIndex(std::vector<Company>& companies) {
     InvertedIndex index;

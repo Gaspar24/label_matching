@@ -56,7 +56,7 @@ vector<string> parseTags(string str) {
 // make a string to lower function
 
 string toLowerString(string str){
-	int i = 0;
+ 	int i = 0;
 	while(i < str.length()){
 		str[i] = tolower(static_cast<unsigned char>(str[i]));
 		i++;

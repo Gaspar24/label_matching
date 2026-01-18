@@ -64,6 +64,8 @@ public:
 	void addLabel(string label);
 	
 };
+using InvertedIndex = unordered_map<string,set<pair<int,Field>>>;
+
 		// helper functions
 vector<string> parse_csv(string line);
 vector<string> parseTags(string str);
