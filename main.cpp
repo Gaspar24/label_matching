@@ -161,9 +161,49 @@ void assignLabels(vector<Company>& companies,  vector<string>& labels, InvertedI
         }
     }
 }
+//works
+void writeCategorizedCSV(string output_path, vector<Company>& companies) {
+    ofstream outFile(output_path);
+    if (!outFile.is_open()) {
+        cerr << "Error , Could not open " << output_path << " for writing." << endl;
+        return;
+    }
+    //write column titles 
+    outFile << "description,business_tags,sector,category,niche,insurance_label" << endl;
+    //adding \ for the "" (quotes)
+    //go trough each row
+    for (auto& c : companies) {
+        outFile << "\"" << c.getDescription() << "\",";
+        outFile << "\"[";
+        vector<string> tags = c.getBusiness_tag();
+        for (size_t i = 0; i < tags.size(); ++i) {
+            outFile << "'" << tags[i] << "'" << (i == tags.size() - 1 ? "" : ", ");
+        }
+        outFile << "\"]";
 
-// use with arguments later
-// 
+        outFile << "\",";
+
+        outFile << "\"" << c.getSector() << "\",";
+        outFile << "\"" << c.getCatrgory() << "\",";
+        outFile << "\"" << c.getNiche() << "\",";
+
+        //adding new column
+        outFile << "\"[";
+        vector<string> labs = c.getLabels();
+      for (size_t i = 0; i < labs.size(); ++i) {
+            outFile << labs[i];
+            // If this is NOT the last element, add a comma
+            if (i < labs.size() - 1) {
+                outFile << ",";
+            }
+        }
+        outFile << "]\"" << endl; 
+    }
+
+    outFile.close();
+}
+
+ 
 int main(int argc, char *argv[]){
 
     if(argc != 3){
@@ -181,25 +221,20 @@ int main(int argc, char *argv[]){
     // Assign labels
 	InvertedIndex index = buildInvertedIndex(companies);
     assignLabels(companies, labels, index);
-  
-	// vector<string> labels_test =companies[0].getLabels();
-	// cout << companies[0].getDescription()<< endl;
-	// cout << "-------------------"<< endl;
-	// for(int i = 0; i < labels_test.size();i++){
-	// 	cout << labels_test[i] << endl;
+
+	// for(auto &c : companies){
+	// 	vector<string> lab = c.getLabels();
+	// 	cout << "Company ID " << c.getId() << ": ";
+	// 	for(int i = 0; i < lab.size(); i++){
+	// 		cout << lab[i] << " | ";
+	// 	}
+	// 	cout << endl;
+	// 	cout << "---------------------" << endl;
+
 	// }
-	for(auto &c : companies){
-		vector<string> lab = c.getLabels();
-		cout << "Company ID " << c.getId() << ": ";
-		for(int i = 0; i < lab.size(); i++){
-			cout << lab[i] << " | ";
-		}
-		cout << endl;
-		cout << "---------------------" << endl;
-
-	}
-
-
+    
+    string output_path = "classified_" + string(argv[1]);
+    writeCategorizedCSV(output_path,companies);
 	return 0;
 
 }
@@ -219,3 +254,6 @@ int main(int argc, char *argv[]){
 // Food Safety Services
 // → food + safety
 // had to check for \r and \n 
+
+// i write to a new file so i don t corrupt the source in case of failure
+//use back slash to write double quotes
