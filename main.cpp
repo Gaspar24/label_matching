@@ -232,22 +232,3 @@ int main(int argc, char *argv[]){
 	return 0;
 
 }
-
-
-/// try to match every keword from the label in every section for the company
-// conver everything to lowercase if use keyword
-// inverted index approach
-// took out some words that apear to foten (service business )
-// Option 2 — Domain expansion (recommended, still rule-based)
-// Add controlled semantic bridges:unordered_map<string, vector<string>> DOMAIN_EXPANSION = {
-//     {"farm", {"food", "agriculture"}},
-//     {"vegetable", {"food"}},
-//     {"farming", {"food"}},
-//     {"cafe", {"food"}}
-// };
-// Food Safety Services
-// → food + safety
-// had to check for \r and \n 
-
-// i write to a new file so i don t corrupt the source in case of failure
-//use back slash to write double quotes
