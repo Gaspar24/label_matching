@@ -1,7 +1,7 @@
 #include "Company.hpp"
 
 
-// works
+// function to get and store the labels from the file
 vector<string> getLabels(string labels_path){
 	fstream labels_taxonomy;
 	labels_taxonomy.open(labels_path,ios::in);
@@ -25,7 +25,10 @@ vector<string> getLabels(string labels_path){
 
 
 
-// works
+// simple function to assign the atributes to the company
+// the index i in the vector will be used to assign the atributes
+// the enum declared in the header file will match with the index, that s why i use switch case here
+
 void assignAtributes(Company &company,vector<string> &columns, int id){
 	vector<string>tags = parseTags(columns[BUSINESS_TAGS]);
 	for(int i = 0; i < columns.size(); i++){
@@ -54,6 +57,8 @@ void assignAtributes(Company &company,vector<string> &columns, int id){
 	company.setId(id);
 }
 
+// function to read the file line by line, parse the line in to the columns and assign the atributes to the compnay
+// the main function that creates and initiate the companies
 vector<Company> getAllCompanies(string companies_path) {
     fstream companiesFile(companies_path, ios::in);
     if (!companiesFile.is_open()) {
@@ -71,8 +76,8 @@ vector<Company> getAllCompanies(string companies_path) {
     while (getline(companiesFile, line)) {
         vector<string> columns = parse_csv(line);
 
-        if (columns.size() != 5)
-            continue; // basic safety
+        if (columns.size() != 5) 
+            continue; // basic safety in case empty line or missing data    
 
         Company c;
         assignAtributes(c, columns, i);
@@ -84,7 +89,8 @@ vector<Company> getAllCompanies(string companies_path) {
 }
 
 
-
+// this is the search engine builder, it stores the company id and the field where that word has been found
+// more info about it on the readme file. (short reason for using an inverted index is the time complexity wit, i traded space complexity for time)
 InvertedIndex buildInvertedIndex(std::vector<Company>& companies) {
     InvertedIndex index;
 
@@ -127,6 +133,7 @@ InvertedIndex buildInvertedIndex(std::vector<Company>& companies) {
     return index;
 }
 
+// gets the keyword from the label and looks for matches in the inverted index map, assign labels bassed on the score(wheight)
 void assignLabels(vector<Company>& companies,  vector<string>& labels, InvertedIndex& index) {
     // Define points per field
     unordered_map<Field, int> fieldPoints = {
@@ -138,13 +145,12 @@ void assignLabels(vector<Company>& companies,  vector<string>& labels, InvertedI
     };
 
     for (auto& label : labels) {
-		// cout << label << endl;
-		// cout << "---------------------" << endl;
         string labelLower = toLowerString(label);
         vector<string> keywords = tokenize(removePunct(labelLower));
 	
         unordered_map<int, int> companyScores; // company id -> score
-
+        // so we iterate trough our keywords from the label and check if exists in our inverted index,
+        //  if so we give it some points bassed on which column(field) is found
         for (auto& kw : keywords) {
             if (index.find(kw) != index.end()) {
                 for (auto& [cid, field] : index.at(kw)) {
@@ -153,15 +159,16 @@ void assignLabels(vector<Company>& companies,  vector<string>& labels, InvertedI
             }
         }
 
-        // Assign label to companies with positive score
+        //assign label to companies with positive score
         for (auto& [cid, score] : companyScores) {
-            if (score >= 5) { // threshold to assign label
+            if (score >= 5) { // score to assign label
                 companies[cid].addLabel(label);
             }
         }
     }
 }
-//works
+//function to write back the file with the new column
+// the function writes everything again in to a new file
 void writeCategorizedCSV(string output_path, vector<Company>& companies) {
     ofstream outFile(output_path);
     if (!outFile.is_open()) {
@@ -177,25 +184,24 @@ void writeCategorizedCSV(string output_path, vector<Company>& companies) {
         outFile << "\"[";
         vector<string> tags = c.getBusiness_tag();
         for (size_t i = 0; i < tags.size(); ++i) {
-            outFile << "'" << tags[i] << "'" << (i == tags.size() - 1 ? "" : ", ");
+            outFile << "'" << tags[i] << "'";
+            if (i != tags.size() - 1)
+                outFile << ", ";
         }
         outFile << "\"]";
-
         outFile << "\",";
-
-        outFile << "\"" << c.getSector() << "\",";
-        outFile << "\"" << c.getCatrgory() << "\",";
-        outFile << "\"" << c.getNiche() << "\",";
+        outFile << c.getSector() << ",";
+        outFile << c.getCatrgory() << ",";
+        outFile << c.getNiche() << ",";
 
         //adding new column
         outFile << "\"[";
         vector<string> labs = c.getLabels();
-      for (size_t i = 0; i < labs.size(); ++i) {
+        for (size_t i = 0; i < labs.size(); ++i) {
             outFile << labs[i];
-            // If this is NOT the last element, add a comma
-            if (i < labs.size() - 1) {
+            // if this is not the last element add a comma
+            if (i < labs.size() - 1)
                 outFile << ",";
-            }
         }
         outFile << "]\"" << endl; 
     }
@@ -207,7 +213,6 @@ void writeCategorizedCSV(string output_path, vector<Company>& companies) {
 int main(int argc, char *argv[]){
 
     if(argc != 3){
-        // type to  error 
         cerr<< "Wrong number of arguments!" << endl;
         return 1;
     }
@@ -221,17 +226,6 @@ int main(int argc, char *argv[]){
     // Assign labels
 	InvertedIndex index = buildInvertedIndex(companies);
     assignLabels(companies, labels, index);
-
-	// for(auto &c : companies){
-	// 	vector<string> lab = c.getLabels();
-	// 	cout << "Company ID " << c.getId() << ": ";
-	// 	for(int i = 0; i < lab.size(); i++){
-	// 		cout << lab[i] << " | ";
-	// 	}
-	// 	cout << endl;
-	// 	cout << "---------------------" << endl;
-
-	// }
     
     string output_path = "classified_" + string(argv[1]);
     writeCategorizedCSV(output_path,companies);
