@@ -1,0 +1,6 @@
+services:
+  classifier:
+    build: .
+    container_name: label_matching-classifier
+    volumes:
+      - ./insurances:/app/insurances

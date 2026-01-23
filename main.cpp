@@ -227,7 +227,7 @@ int main(int argc, char *argv[]){
 	InvertedIndex index = buildInvertedIndex(companies);
     assignLabels(companies, labels, index);
     
-    string output_path = "classified_" + string(argv[1]);
+    string output_path = "insurances/classified_" + string(argv[1]);
     writeCategorizedCSV(output_path,companies);
 	return 0;
 

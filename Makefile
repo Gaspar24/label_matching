@@ -19,14 +19,13 @@ $(NAME) : $(OBJ)
 	
 run: $(NAME)
 	./$(NAME) $(COMPANIES) $(LABELS)
-	rm -f $(NAME)
 
 clean :
 	rm -f $(OBJ)
 
 fclean : clean
 	rm -f $(NAME) 
-	rm -f $(OUTPUT)
+	rm -f ./insurances/$(OUTPUT)
 
 
 

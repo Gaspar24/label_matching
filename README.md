@@ -14,21 +14,32 @@ The programworks best for concrete activities like manufacturing or farming. it 
 The program is designed not to touch your original data. it does not update the old companies file; instead, it generates a brand new CSV file with the classification results. i did this to prevent any data corruption in case the program crashes or has a runtime failure. the output file will be named with a classified_ prefix.
 
 
-			HOW TO RUN IT !
+							HOW TO RUN IT !
+		-----IMPORTANT:	The new File will be created in the insurances folder--------
 	to make things easy, i created a Makefile that handles the compilation and execution.
  1. using the makefile
-	if you just want to run everything with the default files, use:
-	make run
-	this will compile the code, run the classification using ml_insurance_challenge.csv and insurance_taxonomy.csv, and then clean up the executable.
+	-if you just want to run everything with the default files, use: make run
+		this will compile the code, run the classification using ml_insurance_challenge.csv and insurance_taxonomy.csv from the insurances folder, and then clean up the executable.
+		-also if you want to test with different files and run with makefile modify the COMPANIES and LABELS variables from the MAkefile
 
-2. running manually
+
+	---------- IF YOU DON T HAVE MAKEFILE INSTALLED----------
+2. running manually 
 	if you want to run it manually or use different filenames, follow these steps:
-	compile the program by typing:
+	compile the program by typing in the terminal:
 	-> g++ -Wall -Wextra -Werror main.cpp helper_functions.cpp Company.cpp -o challenge
 	run the executable with the two file arguments:
 	./challenge "your_companies_file.csv" "your_labels_file.csv"
+	
+	---------- IF YOU DON T HAVE MAKEFILE , C++ AND/OR A COMPILER INSTALLED ----------
+3. Run with Docker 
+	docker-compose up --build
+	important note: the input files should be located in the insurances folder for the program to find them correctly. this is how the argument parsing is set up in the code.
 
-important note: the input files should be located in the insurances folder for the program to find them correctly. this is how the argument parsing is set up in the code.
+	---------IF YOU DON T HAVE MAKEFILE , C++ ,A COMPILER  OR DOCKER INSTALLED ----------
+		IDK - just watch this : https://www.youtube.com/watch?v=SNKjJvAXwJo
 
-	CLEAN UP
+5. CLEAN UP
 	-just type make fclean
+
+

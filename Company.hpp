@@ -12,7 +12,6 @@
 #include <unistd.h> // test for now
 
 using namespace std;
-// using InvertedIndex = unordered_map<string,set<pair<int,Field>>>;
 
 
 enum  Field {
@@ -36,7 +35,6 @@ private:
 	vector<string> _labels;
 
 public:
-	// void display();
 	Company();
 	~Company();
 

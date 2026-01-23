@@ -72,6 +72,3 @@ void Company::setNiche(string niche) {
     _niche = niche;
 }
 
-// void Company::display(){
-// 	cout<<this->_description << endl;
-// }
